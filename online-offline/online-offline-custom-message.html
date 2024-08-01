@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Status Check with Offline Link Handling</title>
+    <style>
+        #offlineMessage {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            z-index: 1000;
+        }
+        #customContent {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            z-index: 1100;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Black with opacity */
+            z-index: 900; /* Below the custom content but above other content */
+        }
+    </style>
+    <script>
+        function updateOnlineStatus() {
+            const offlineMessage = document.getElementById('offlineMessage');
+            const overlay = document.getElementById('overlay');
+            const customContent = document.getElementById('customContent');
+
+            if (navigator.onLine) {
+                offlineMessage.style.display = 'none'; // Hide message when online
+                overlay.style.display = 'none'; // Hide overlay when online
+                customContent.style.display = 'none'; // Hide custom content when online
+            } else {
+                offlineMessage.style.display = 'block'; // Show message when offline
+            }
+        }
+
+        function handleLinkClick(event) {
+            if (!navigator.onLine) {
+                event.preventDefault(); // Prevent default link behavior
+                const overlay = document.getElementById('overlay');
+                const customContent = document.getElementById('customContent');
+                
+                overlay.style.display = 'block'; // Show overlay
+                customContent.style.display = 'block'; // Show custom content
+
+                // Populate custom content if needed
+                customContent.innerHTML = `
+                    <h2>You are currently offline!</h2>
+                    <p>Please check your internet connection.</p>
+                    <button onclick="closeCustomContent()">Close</button>
+                `;
+            }
+        }
+
+        function closeCustomContent() {
+            const overlay = document.getElementById('overlay');
+            const customContent = document.getElementById('customContent');
+            overlay.style.display = 'none'; // Hide overlay
+            customContent.style.display = 'none'; // Hide custom content
+        }
+
+        // Check the online status when the page loads
+        window.addEventListener('load', updateOnlineStatus);
+        // Listen for online and offline events
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+
+        // Attach click events to links
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                link.addEventListener('click', handleLinkClick);
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div id="offlineMessage">
+    You seem to be offline. Connect to the internet to reload.
+</div>
+<div id="overlay"></div>
+<div id="customContent"></div>
+
+<h1>Welcome to My Website</h1>
+<p>This is an example page to demonstrate online status checking.</p>
+<p><a href="#">This is a link that will show custom content when offline.</a></p>
+<p><a href="https://example.com">This link will go to example.com (test it online)</a></p>
+
+</body>
+</html>
