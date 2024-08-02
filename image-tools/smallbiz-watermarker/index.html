@@ -1,0 +1,202 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Image Watermarker - Small Business Toolit</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.3/cerulean/bootstrap.min.css" integrity="sha512-vaImhtQoaCXvevCM/UK+8ND/df0kiQWLtR65wgq0AWShEXLpWHMve0oGgU0q1gq1MbbyEuAhMMlqNmZd7s7wTQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .maximum {
+            max-width: 100%;
+        }
+		
+		.custom-form-control {
+			height: 30px; /* Adjust as needed */
+			padding: 3px 12px; /* Adjust as needed */
+			font-size: 14px; /* Adjust as needed */
+			line-height: 1.5; /* Adjust as needed */
+		}
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Image Watermarker - Small Business Toolit</h2>
+        <p class="">App that makes it easy to add a watermark to your images. Try it today and protect your visual content.</p>
+        <div class="row">
+            <!-- Left column for the settings form -->
+            <div class="col-md-3">
+                <h4>Watermark Settings</h4>
+                <form id="watermarkSettings">
+                    <div class="mb-3">
+                        <label for="positionInput" class="form-label">Watermark Position</label>
+                        <select id="positionInput" class="form-control custom-form-control">
+                            <option value="tiled">Tiled</option>
+                            <option value="topLeft">Top Left</option>
+                            <option value="topCenter">Top Center</option>
+                            <option value="topRight">Top Right</option>
+                            <option value="bottomLeft">Bottom Left</option>
+                            <option value="bottomCenter">Bottom Center</option>
+                            <option value="bottomRight">Bottom Right</option>
+                        </select>
+                    </div>
+					<div class="mb-3">
+                        <label for="spacingInput" class="form-label">Spacing</label>
+                        <input type="number" class="form-control custom-form-control" id="spacingInput" min="0" value="250">
+                    </div>
+                    <div class="mb-3">
+                        <label for="widthInput" class="form-label">Watermark Width</label>
+                        <input type="number" class="form-control custom-form-control" id="widthInput" min="0" value="160">
+                    </div>
+                    <div class="mb-3">
+                        <label for="heightInput" class="form-label">Watermark Height</label>
+                        <input type="number" class="form-control custom-form-control" id="heightInput" min="0" value="50">
+                    </div>
+                    <div class="mb-3">
+                        <label for="transparencyInput" class="form-label">Transparency</label>
+                        <input type="number" class="form-control custom-form-control" step="0.1" id="transparencyInput" min="0" max="1" value="0.3">
+                    </div>
+                    <div class="mb-3">
+                        <label for="logoInput" class="form-label">Upload Your Logo</label>
+                        <input type="file" id="logoInput" class="form-control custom-form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="imageIn" class="form-label">Upload Your Image</label>
+                        <input type="file" id="imageIn" class="form-control custom-form-control">
+                    </div>
+                    <div class="mb-3">
+                        <button id="applyWatermarkButton" type="button" class="btn btn-primary">Apply Watermark</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Right column for displaying the result image -->
+            <div class="col-md-9">
+                <div class="d-flex align-items-center justify-content-center">
+                    <h4 class="mr-2">Result:</h4>
+                    <div class="btn-group align-items-center justify-content-center" role="group" aria-label="Download Formats">
+                         <button id="downloadJPG" type="button" class=" btn btn-primary btn-sm mr-2" style="display: none;">Download as JPG</button>
+                        <button id="downloadPNG" type="button" class="btn btn-primary btn-sm mr-2" style="display: none;">Download as PNG</button>
+                         <button id="downloadWEBP" type="button" class="btn btn-primary btn-sm" style="display: none;">Download as WEBP</button>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+					<img id="imgholder" src="images/html-save-config.jpg" class="img-fluid maximum" alt="Result Image">
+				</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="js/watermarker.js"></script>
+<script>
+$(document).ready(function() {
+    $('#applyWatermarkButton').on('click', function(e) {
+        e.preventDefault();
+
+        var logoInput = document.getElementById('logoInput').files[0];
+        var imageInput = document.getElementById('imageIn').files[0];
+
+        if (logoInput && imageInput) {
+            var logoFileReader = new FileReader();
+            logoFileReader.onload = function(fileLoadedEvent) {
+                var logoImage = new Image();
+                logoImage.src = fileLoadedEvent.target.result;
+
+                var imageFileReader = new FileReader();
+                imageFileReader.onload = function(fileLoadedEvent2) {
+                    var mainImage = new Image();
+                    mainImage.onload = function() {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = this.width;
+                        canvas.height = this.height;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(this, 0, 0);
+
+                        var logoImage = new Image();
+                        logoImage.onload = function() {
+                            
+                            var position = $('#positionInput').val();
+                            
+                            var logoWidth = parseInt($('#widthInput').val());
+                            var logoHeight = parseInt($('#heightInput').val());
+                            var spacing = parseInt($('#spacingInput').val());
+                            var transparency = parseFloat($('#transparencyInput').val());
+
+                            ctx.globalAlpha = transparency;
+                            
+                            switch (position) {
+                                case 'tiled':
+                                    var x = spacing;
+                                    var y = spacing;
+                                    while (x < canvas.width) {
+                                        while (y < canvas.height) {
+                                            ctx.drawImage(logoImage, x, y, logoWidth, logoHeight);
+                                            y += logoHeight + spacing;
+                                        }
+                                        x += logoWidth + spacing;
+                                        y = spacing;
+                                    }
+                                    break;
+                                case 'topLeft':
+                                    ctx.drawImage(logoImage, spacing, spacing, logoWidth, logoHeight);
+                                    break;
+                                case 'topCenter':
+                                    ctx.drawImage(logoImage, (canvas.width - logoWidth)/2, spacing, logoWidth, logoHeight);
+                                    break;
+                                case 'topRight':
+                                    ctx.drawImage(logoImage, canvas.width - logoWidth - spacing, spacing, logoWidth, logoHeight);
+                                    break;
+                                case 'bottomLeft':
+                                    ctx.drawImage(logoImage, spacing, canvas.height - logoHeight - spacing, logoWidth, logoHeight);
+                                    break;
+                                case 'bottomCenter':
+                                    ctx.drawImage(logoImage, (canvas.width - logoWidth)/2, canvas.height - logoHeight - spacing, logoWidth, logoHeight);
+                                    break;
+                                case 'bottomRight':
+                                    ctx.drawImage(logoImage, canvas.width - logoWidth - spacing, canvas.height - logoHeight - spacing, logoWidth, logoHeight);
+                                    break;
+                                case 'center':
+                                    ctx.drawImage(logoImage, (canvas.width - logoWidth)/2, (canvas.height - logoHeight)/2, logoWidth, logoHeight);
+                                    break;
+                            }
+
+                            $('#imgholder').attr('src', canvas.toDataURL('image/jpeg'));
+                            $('#downloadJPG, #downloadPNG, #downloadWEBP').css('display', 'inline-block');
+
+                            $('#downloadJPG').off('click').on('click', function() {
+                                var link = document.createElement('a');
+                                link.download = 'watermarked_image.jpg';
+                                link.href = canvas.toDataURL('image/jpeg');
+                                link.click();
+                            });
+
+                            $('#downloadPNG').off('click').on('click', function() {
+                                var link = document.createElement('a');
+                                link.download = 'watermarked_image.png';
+                                link.href = canvas.toDataURL('image/png');
+                                link.click();
+                            });
+
+                            $('#downloadWEBP').off('click').on('click', function() {
+                                var link = document.createElement('a');
+                                link.download = 'watermarked_image.webp';
+                                link.href = canvas.toDataURL('image/webp');
+                                link.click();
+                            });
+                        };
+                        logoImage.src = fileLoadedEvent.target.result;
+                    };
+                    mainImage.src = fileLoadedEvent2.target.result;
+                };
+                imageFileReader.readAsDataURL(imageInput);
+            }
+            logoFileReader.readAsDataURL(logoInput);
+        } else {
+            alert('Please select both logo and image to be watermarked before applying the watermark.');
+        }
+    });
+});
+</script>
+</body>
+</html>
