@@ -1,4 +1,4 @@
-# Smallbiz Toolkit
+# Small Business Toolkit
 
 Welcome to the **Smallbiz Toolkit**! This open-source repository is designed to equip small business owners with essential tools and resources to effectively market and grow their businesses. Whether you're just starting out or looking to expand, our toolkit aims to provide valuable support to entrepreneurs like you.
 
